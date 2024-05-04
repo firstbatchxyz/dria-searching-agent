@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "dria-searching-agent"
+version = "0.1.0"
+description = "Agentic search framewowk"
+authors = ["andthattoo <omer@firstbatch.xyz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<=3.13"
+anthropic = "^0.25.7"
+crewai = "^0.28.8"
+
+[tool.poetry.group.dev.dependencies]
+openai = "^1.25.1"
+duckduckgo-search = "^5.3.0"
+
+[tool.poetry.scripts]
+app = "dria_searching_agent.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
