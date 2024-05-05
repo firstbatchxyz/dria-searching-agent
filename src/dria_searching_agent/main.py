@@ -51,7 +51,7 @@ class BrowserTools:
 def main():
     load_dotenv()
     bt = BrowserTools()
-    d = bt.scrape_website("https://towardsdatascience.com/understanding-kl-divergence-f3ddc8dff254")
+    d = bt.scrape_website("https://dergipark.org.tr/en/pub/tchd/issue/44442/550633")
     print("Hello, I am a searching agent")
 
 

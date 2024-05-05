@@ -1,13 +1,12 @@
 import json
-import os
-
 import requests
-from langchain.tools import tool
-from dotenv import load_dotenv
+from langchain.tools import tool, DuckDuckGoSearchRun
 import os
 from enum import Enum, auto
 import httpx
 import base64
+from crewai import Agent, Task
+
 
 
 class Locale(Enum):
@@ -112,29 +111,132 @@ class NewsResult:
         return f"{self.title} \n {self.link} \n {self.snippet} \n {self.date} \n {self.source} \n {self.imageUrl} \n {self.position}"
 
 
-class SearchTools:
+class SerperSearchTools:
+
+    @tool("Arxiv search")
+    def search_arxiv(inp):
+        """
+        This is a tool to search the arxiv web about a given question and return relevant sources written on the topic.
+
+        Parameters:
+        - query: the question to search for
+
+        {"query": query}
+
+        Returns:
+        Response based on the input """
+        inp = json.loads(inp)
+        query = "arxiv " + inp["query"]
+        stype = "search"
+        lang = Locale.ENGLISH
+        n_results = 25
+
+        return SerperSearchTools.search(query, stype, lang, n_results)
 
     @tool("Search internet")
-    def search_internet(query):
-        """Useful to search the internet about a given topic and return relevant
-    results."""
-        return SearchTools.search(query)
+    def search_internet(inp):
+        """
+        This is a tool to search the internet about a given question and return relevant results.
 
-    @tool("Search instagram")
-    def search_instagram(query):
-        """Useful to search for instagram post about a given topic and return relevant
-    results."""
-        query = f"site:instagram.com {query}"
-        return SearchTools.search(query)
+        Parameters:
+        - query: the question to search for
+        - lang: language to search in
+        - n_results: number of results to return
 
-    def search(query, lang=Locale.ENGLISH, n_results=5):
-        url = "https://google.serper.dev/" + "search"
-        payload = json.dumps({
+        {"query": query, "lang": lang, "n_results": n_results}
+
+        Returns:
+        Response based on the input """
+        inp = json.loads(inp)
+        query = inp["query"]
+        stype = "search"
+        lang = inp["lang"]
+        n_results = inp["n_results"]
+
+        return SerperSearchTools.search(query, stype, lang, n_results)
+
+    @tool("Search scholarly articles")
+    def search_articles(inp):
+        """
+        This is a tool to search the scholar web about a given question and return relevant sources written on the topic.
+
+        Parameters:
+        - query: the question to search for
+        - lang: language to search in
+        - n_results: number of results to return
+
+        {"query": query, "lang": lang, "n_results": n_results}
+
+        Returns:
+        Response based on the input """
+        inp = json.loads(inp)
+        query = inp["query"]
+        stype = "scholar"
+        lang = inp["lang"]
+        n_results = inp["n_results"]
+
+        return SerperSearchTools.search(query, stype, lang, n_results)
+
+    @tool("Search news")
+    def search_news(inp):
+        """
+        This is a tool to search the news web about a given question and return relevant news articles.
+
+        Parameters:
+        - query: the question to search for
+        - lang: language to search in
+        - n_results: number of results to return
+
+        {"query": query, "lang": lang, "n_results": n_results}
+
+        Returns:
+        Response based on the input """
+        inp = json.loads(inp)
+        query = inp["query"]
+        stype = "news"
+        lang = inp["lang"]
+        n_results = inp["n_results"]
+
+        return SerperSearchTools.search(query, stype, lang, n_results)
+
+    @tool("Search images")
+    def search_images(inp):
+        """
+        This is a tool to search the web for images based on a given query.
+
+        Parameters:
+        - query: the query to search for
+        - lang: language to search in
+        - n_results: number of results to return
+
+        {"query": query, "lang": lang, "n_results": n_results}
+
+        Returns:
+        Response based on the input """
+        inp = json.loads(inp)
+        query = inp["query"]
+        lang = inp["lang"]
+        n_results = inp["n_results"]
+
+        return SerperSearchTools.image_search(query, lang, n_results)
+
+    def search(query, stype="search", lang=Locale.ENGLISH, n_results=5):
+
+        assert stype in ["search", "scholar", "news"], "Invalid search type"
+        url = "https://google.serper.dev/" + stype
+        gl = lang.value if lang.value != "en" else "us"
+        payload = {
             "q": query,
-            "gl": lang.value,
+            "gl": gl,
             "hl": lang.value,
-            "page": 2
-        })
+            "page": 1,
+            "num": min(n_results, 50)
+        }
+
+        if stype == "scholar":
+            del payload["num"]
+
+        payload = json.dumps(payload)
         headers = {
             'X-API-KEY': os.environ['SERPER_API_KEY'],
             'content-type': 'application/json'
@@ -142,8 +244,16 @@ class SearchTools:
         response = requests.request("POST", url, headers=headers, data=payload)
 
         results = response.json()['organic']
-        knowledge_graph = response.json()['knowledgeGraph']
-        results = [SearchResult(result) for result in results[:n_results]]
+        # knowledge_graph = response.json()['knowledgeGraph']
+        if stype == "search":
+            results = [SearchResult(result) for result in results[:n_results]]
+        elif stype == "scholar":
+            results = [ScholarResult(result) for result in results[:n_results]]
+        elif stype == "news":
+            results = [NewsResult(result) for result in results[:n_results]]
+        else:
+            raise ValueError("Invalid search type")
+
         formatted_results = []
         for result in results[:n_results]:
             try:
@@ -156,9 +266,10 @@ class SearchTools:
 
     def image_search(query, lang=Locale.ENGLISH, n_results=5):
         url = "https://google.serper.dev/" + "image"
+        gl = lang.value if lang.value != "en" else "us"
         payload = json.dumps({
             "q": query,
-            "gl": lang.value,
+            "gl": gl,
             "hl": lang.value,
             "num": min(n_results, 15)
         })
@@ -170,6 +281,7 @@ class SearchTools:
 
         results = response.json()['images']
         results = [ImageResult(result) for result in results[:n_results]]
+        # TODO: Add Vision API to get image content
         formatted_results = []
         for result in results[:n_results]:
             try:
@@ -180,18 +292,47 @@ class SearchTools:
         content = '\n'.join(formatted_results)
         return f"\nSearch result: {content}\n"
 
-    def news_search(query, lang=Locale.ENGLISH, n_results=5):
-        url = "https://google.serper.dev/" + "news"
+    def arxiv_search(query, lang=Locale.ENGLISH, n_results=5):
+        url = "https://google.serper.dev/" + "search"
+        gl = lang.value if lang.value != "en" else "us"
         payload = json.dumps({
             "q": query,
-            "gl": lang.value,
+            "gl": gl,
             "hl": lang.value,
-            "page": 2
+            "num": min(n_results, 15)
         })
-
         headers = {
             'X-API-KEY': os.environ['SERPER_API_KEY'],
             'content-type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
+
+        results = response.json()['organic']
+        results = [SearchResult(result) for result in results[:n_results]]
+        formatted_results = []
+        for result in results[:n_results]:
+            try:
+                formatted_results.append(str(result))
+            except KeyError:
+                pass
+
+        content = '\n'.join(formatted_results)
+
+        agent = Agent(
+            role='Principal Researcher',
+            goal='Do amazing researches and summaries based on the content you are working with',
+            backstory="You're a Principal Researcher at a big company and you need to do a research about a given topic.",
+            allow_delegation=False)
+
+        task = Task(
+              agent=agent,
+              description=f'Analyze the content bellow, make sure to include the most relevant '
+                          f'information in the summary, return only the summary nothing else.\n\nCONTENT\n----------\n{content}'
+          )
+        #TODO: Do OCR here with PDFs.
+        #summary = task.execute()
+        #summaries.append(summary)
+
+        return f"\nSearch result: {content}\n"
+
 
