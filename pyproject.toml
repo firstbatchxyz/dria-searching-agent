@@ -6,9 +6,14 @@ authors = ["andthattoo <omer@firstbatch.xyz>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12,<=3.13"
+python = ">=3.10,<3.12"
 anthropic = "^0.25.7"
-crewai = "^0.28.8"
+crewai = {extras = ["tools"], version = "^0.28.8"}
+langchain = "^0.1.17"
+unstructured = "^0.13.6"
+playwright = "^1.43.0"
+python-dotenv = "^1.0.1"
+httpx = "^0.27.0"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.25.1"

@@ -20,3 +20,11 @@ Run app directly with:
 ```bash
 poetry run app
 ```
+
+
+```bash
+docker build -t agent-browser .
+docker run -p 3000:3000 agent-browser
+docker run -p 3000:3000 -e "TOKEN=6R0W53R135510" ghcr.io/browserless/chromium
+``` 
+
