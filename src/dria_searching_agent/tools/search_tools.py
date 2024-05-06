@@ -117,6 +117,7 @@ class SerperSearchTools:
     def search_arxiv(inp):
         """
         This is a tool to search the arxiv web about a given question and return relevant sources written on the topic.
+        It will return a list of results where each result have an arxiv paper url
 
         Parameters:
         - query: the question to search for
@@ -326,13 +327,38 @@ class SerperSearchTools:
 
         task = Task(
               agent=agent,
-              description=f'Analyze the content bellow, make sure to include the most relevant '
-                          f'information in the summary, return only the summary nothing else.\n\nCONTENT\n----------\n{content}'
+              description=f"""
+                You will be provided with a search query and a list of search results. Your task is to determine which 
+                search result is the most relevant to the given query.
+                
+                Here is the search query:
+                <query>
+                {query}
+                </query>
+                
+                And here are the search results to analyze:
+                <search_results>
+                {content}
+                </search_results>
+                
+                Please carefully read the search query and each of the search results. 
+                Analyze how relevant each search result is to answering the query. 
+                Format your result like this:
+                <result>
+                Link: [link to the search result]
+                Title: [title of the search result] 
+                </result>
+                
+                Remember, I am looking for the single most relevant result from the provided list, not a new search or 
+                information from outside the given search_results. 
+                Analyze the relevance carefully and explain your reasoning before providing your final result.
+                """
           )
         #TODO: Do OCR here with PDFs.
-        #summary = task.execute()
-        #summaries.append(summary)
+        most_relevant = task.execute()
+        # Double-check the string to pick the url from string using regex
 
-        return f"\nSearch result: {content}\n"
+        return f"\nSearch result: {most_relevant}\n"
+
 
 
