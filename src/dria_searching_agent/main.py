@@ -12,6 +12,7 @@ from src.dria_searching_agent.tools.vision_tools import VisionTools
 from src.dria_searching_agent.tools.browser_tools import BrowserTools
 from dotenv import load_dotenv
 
+
 class ResearchCrew:
     def __init__(self, query):
         self.agents_config = json.loads(open("src/dria_searching_agent/config/agents.json", "r").read())
@@ -34,16 +35,14 @@ class ResearchCrew:
 
     def __pick_agent(self):
 
-        pick_agent = Task(
-            description=TaskPrompts.pick_agent(
-                query=self.query,
-                agents="\n".join([agent for agent in self.agents.keys()])
-            ),
-            agent=self.picker
-        )
+        task = TaskPrompts().pick_agent(
+            query=self.query,
+            agents="\n".join([agent + "\n" + self.agents[agent].backstory for agent in self.agents.keys()]),
+            agent=self.picker)
+
         crew = Crew(
             agents=[self.picker],
-            tasks=[pick_agent],
+            tasks=[task],
             verbose=True
         )
         agent = crew.kickoff()
@@ -51,10 +50,8 @@ class ResearchCrew:
         return agent
 
     def __do_research(self, agent):
-        initial_search = Task(
-            description=TaskPrompts.do_research(query=self.query, role=agent.role),
-            agent=agent
-        )
+
+        initial_search = TaskPrompts().do_research(query=self.query, role=agent.role, agent=agent)
         crew = Crew(
             agents=[agent],
             tasks=[initial_search],
@@ -64,12 +61,10 @@ class ResearchCrew:
         return research
 
     def __evaluate(self, research):
-        evaluate_task = Task(
-            description=TaskPrompts.evaluate_results(
+        evaluate_task = TaskPrompts().evaluate_results(
                 search_results=research,
-                query=self.query),
-            agent=self.evaluator
-        )
+                query=self.query,agent=self.evaluator)
+
         crew = Crew(
             agents=[self.evaluator],
             tasks=[evaluate_task],
@@ -123,6 +118,8 @@ class ResearchCrew:
         )
 
 def main():
+    #import pdb
+    #pdb.set_trace()
     load_dotenv()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
