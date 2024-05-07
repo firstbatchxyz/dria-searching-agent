@@ -7,7 +7,7 @@ import json
 
 class FinancialData:
     @tool("Financial Data collector")
-    def scrape(inp):
+    def scrape(exchange, ticker):
         """
         This is a tool used to collect financial stock data
 
@@ -20,11 +20,9 @@ class FinancialData:
         Returns:
         Response based on the input
         """
-        data = json.loads(inp)
-
         BASE_URL = "https://www.google.com/finance"
-        INDEX = data['exchange']
-        SYMBOL = data['ticker']
+        INDEX = exchange
+        SYMBOL = ticker
         LANGUAGE = "en"
         TARGET_URL = f"{BASE_URL}/quote/{SYMBOL}:{INDEX}?hl={LANGUAGE}"
 
@@ -38,6 +36,5 @@ class FinancialData:
             item_description = item.find("div", {"class": "mfs7Fc"}).text
             item_value = item.find("div", {"class": "P6K39c"}).text
             stock_description[item_description] = item_value
-
 
         return stock_description

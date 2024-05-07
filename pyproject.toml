@@ -26,6 +26,8 @@ duckduckgo-search = "^5.3.0"
 
 [tool.poetry.scripts]
 app = "dria_searching_agent.main:main"
+vectordb = "dria_searching_agent.db.storage:main"
+scrape = "dria_searching_agent.tools.browser_tools:main"
 
 [build-system]
 requires = ["poetry-core"]

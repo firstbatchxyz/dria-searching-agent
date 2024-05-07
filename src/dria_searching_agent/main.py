@@ -6,7 +6,7 @@ from textwrap import dedent
 from crewai import Agent, Crew, Task
 from src.dria_searching_agent.tasks import TaskPrompts
 
-# from tools.fin_tools import FinancialData
+from src.dria_searching_agent.tools.fin_tools import FinancialData
 from src.dria_searching_agent.tools.search_tools import SerperSearchTools
 from src.dria_searching_agent.tools.vision_tools import VisionTools
 from src.dria_searching_agent.tools.browser_tools import BrowserTools
@@ -96,8 +96,9 @@ class ResearchCrew:
                 tools=[
                     SerperSearchTools.search_internet,
                     SerperSearchTools.search_images,
-                    SerperSearchTools.get_context,
                     BrowserTools.scrape_website,
+                    SerperSearchTools.get_context,
+                    FinancialData.scrape,
                     VisionTools.vision
                 ]
             )

@@ -223,10 +223,10 @@ class SerperSearchTools:
 
         return SerperSearchTools.image_search(query, lang, n_results)
 
-    @tool("Ask storage for context")
+    @tool("Ask storage for scraped website content")
     def get_context(query):
         """
-        This is a tool to get revelant context of stored PDFs in the storage
+        This is a tool to get revelant context from scraped websites in the storage
 
         Parameters:
         - query: the query to search for
