@@ -28,7 +28,7 @@ class BrowserTools:
     content = BrowserTools.clean_text(content)
     content = [content[i:i + 8000] for i in range(0, len(content), 8000)]
     chunks = [chunk for chunk in content]
-    body = "\n\n".join(chunks)
+    # body = "\n\n".join(chunks)
 
     storage = Storage()
     storage.add_text_chunks(chunks, website)
