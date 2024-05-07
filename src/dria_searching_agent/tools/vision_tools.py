@@ -9,6 +9,7 @@ from langchain_core.messages import HumanMessage
 import httpx
 import base64
 from io import BytesIO
+from src.dria_searching_agent.db import Storage
 
 
 def read_response_bytes(response):
@@ -58,7 +59,7 @@ def download_pdf(url, save_path):
 
 class VisionTools:
     @tool("Image analysis")
-    def vision(inp):
+    def vision(url, query):
         """
     This is a tool used to analyze an image based on a query
 
@@ -72,11 +73,9 @@ class VisionTools:
     Response from the vision model based on the prompt and image provided
     """
 
-        inp = json.loads(inp)
-
         chat = ChatAnthropic(model=os.environ["CLAUDE_SONNET"], api_key=os.environ['ANTHROPIC_KEY'])
-        url = inp["url"]
-        query = inp["query"]
+        #url = inp["url"]
+        #query = inp["query"]
         # Check if url ends with jpg, jpeg or png, or other
         if url.endswith("jpg") or url.endswith("jpeg") or url.endswith("png"):
             media_type = "image/{}".format(url.split(".")[-1])
@@ -100,13 +99,17 @@ class VisionTools:
         re = chat.invoke(messages)
         return re.content
 
-    @tool("PDF OCR analysis")
-    def ocr(url):
+    @tool("Read PDF analysis")
+    def read_pdf(url):
         """
-    This is a tool used to extract text from a PDF
+    This is a tool used to extract text from a PDF and store it in a storage
+        Parameters:
+        - url: This is the url of the PDF to be analyzed
         :return:
     """
         # Download PDF from URL
         # Read the PDF
         chunks, lang = to_chunks(url)
-        return "\n".join([chunk["text"] for chunk in chunks]), lang
+        storage = Storage()
+        storage.add_chunks(chunks)
+        return "Pdf added to storage successfully"

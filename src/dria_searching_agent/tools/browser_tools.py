@@ -5,7 +5,8 @@ import requests
 from langchain.tools import tool
 from unstructured.partition.html import partition_html
 
-from dotenv import load_dotenv
+import tiktoken
+from src.dria_searching_agent.db import Storage
 import os
 
 
@@ -25,5 +26,15 @@ class BrowserTools:
     content = "\n\n".join([str(el) for el in elements])
     content = [content[i:i + 8000] for i in range(0, len(content), 8000)]
     chunks = [chunk for chunk in content]
-    return "\n\n".join(chunks)
+    body = "\n\n".join(chunks)
+
+    model = tiktoken.encoding_for_model("gpt-4")
+    body_tokens = model.encode(body)
+    if len(body_tokens) > 15_000:
+      storage = Storage()
+      storage.add_chunks(chunks)
+      return "Website too context large, added to storage for further querying"
+
+    return body
+
 

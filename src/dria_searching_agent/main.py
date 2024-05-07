@@ -27,10 +27,12 @@ class ResearchCrew:
         research = self.__do_research(agent)
         feedback = self.__evaluate(research)
         i = 0
-        while i < 2 and feedback.lower() != "satisfactory":
-            research = self.__do_research(agent)
-            feedback = self.__evaluate(research)
+        if feedback[-1] == ".":
+            feedback = feedback[:-1]
 
+        while i < 1 and feedback.lower().strip() != "satisfactory":
+            research = self.__do_research_w_feedback(agent, feedback)
+            feedback = self.__evaluate(research)
         return research
 
     def __pick_agent(self):
@@ -60,6 +62,18 @@ class ResearchCrew:
         research = crew.kickoff()
         return research
 
+    def __do_research_w_feedback(self, agent, feedback):
+
+            feedback_search = TaskPrompts().do_research_w_feedback(query=self.query, role=agent.role,
+                                                                  feedback=feedback ,agent=agent)
+            crew = Crew(
+                agents=[agent],
+                tasks=[feedback_search],
+                verbose=True
+            )
+            research = crew.kickoff()
+            return research
+
     def __evaluate(self, research):
         evaluate_task = TaskPrompts().evaluate_results(
                 search_results=research,
@@ -81,12 +95,10 @@ class ResearchCrew:
                 verbose=True,
                 tools=[
                     SerperSearchTools.search_internet,
-                    SerperSearchTools.search_arxiv,
-                    SerperSearchTools.search_news,
-                    SerperSearchTools.search_articles,
+                    SerperSearchTools.search_images,
+                    SerperSearchTools.get_context,
                     BrowserTools.scrape_website,
-                    VisionTools.vision,
-                    VisionTools.ocr
+                    VisionTools.vision
                 ]
             )
             self.agents[k.lower().strip()] = agent

@@ -6,7 +6,8 @@ from enum import Enum, auto
 import httpx
 import base64
 from crewai import Agent, Task
-
+from src.dria_searching_agent.tools.vision_tools import VisionTools
+from src.dria_searching_agent.db import Storage
 
 
 class Locale(Enum):
@@ -151,6 +152,24 @@ class SerperSearchTools:
 
         return SerperSearchTools.search(query, stype, lang, n_results)
 
+    @tool("Search internet for PDF articles")
+    def search_pdf(query, lang, n_results):
+        """
+        This is a tool to search the web about a given question and stores relevant PDF article in storage.
+
+        Parameters:
+        - query: the question to search for
+        - lang: language to search in
+        - n_results: number of results to return
+
+        {"query": query, "lang": lang, "n_results": n_results}
+
+        Returns:
+        State of the operation, successful or error """
+        query = "pdf " + query
+
+        return SerperSearchTools.pdf_search(query, lang, n_results)
+
     @tool("Search scholarly articles")
     def search_articles(query, lang, n_results):
         """
@@ -203,6 +222,22 @@ class SerperSearchTools:
         Response based on the input """
 
         return SerperSearchTools.image_search(query, lang, n_results)
+
+    @tool("Ask storage for context")
+    def get_context(query):
+        """
+        This is a tool to get revelant context of stored PDFs in the storage
+
+        Parameters:
+        - query: the query to search for
+
+        {"query": query}
+
+        Returns:
+        a list of relevant text chunks with metadata """
+        storage = Storage()
+        results = storage.query(query)
+        return results
 
     def search(query, stype="search", lang=Locale.ENGLISH.value, n_results=5):
 
@@ -276,7 +311,7 @@ class SerperSearchTools:
         content = '\n'.join(formatted_results)
         return f"\nSearch result: {content}\n"
 
-    def arxiv_search(query, lang=Locale.ENGLISH.value, n_results=5):
+    def pdf_search(query, lang=Locale.ENGLISH.value, n_results=5):
         url = "https://google.serper.dev/" + "search"
         gl = lang if lang != "en" else "us"
         payload = json.dumps({
@@ -327,21 +362,20 @@ class SerperSearchTools:
                 Please carefully read the search query and each of the search results. 
                 Analyze how relevant each search result is to answering the query. 
                 Format your result like this:
-                <result>
-                Link: [link to the search result]
-                Title: [title of the search result] 
-                </result>
+                [link to the search result]
                 
                 Remember, I am looking for the single most relevant result from the provided list, not a new search or 
                 information from outside the given search_results. 
                 Analyze the relevance carefully and explain your reasoning before providing your final result.
-                """
+                """,
+                expected_output="The expected output should be the link to the most relevant search result from the list provided. "
           )
         #TODO: Do OCR here with PDFs.
         most_relevant = task.execute()
         # Double-check the string to pick the url from string using regex
+        msg = VisionTools.read_pdf(most_relevant)
 
-        return f"\nSearch result: {most_relevant}\n"
+        return msg
 
 
 

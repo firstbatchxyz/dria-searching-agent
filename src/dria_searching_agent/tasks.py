@@ -9,7 +9,7 @@ class TaskPrompts:
       Utilize your specialty background and {role} perspective to gather relevant information.
 
       Analyze the query to determine the most appropriate search methods. Consider the following:
-      - If the query requires visual information or real-world examples, prioritize image-based searches.
+      - If the query explicitly requires visual information or real-world examples, prioritize image-based searches.
       - If the query demands scientific or academic insights, focus on scholarly articles and research papers.
       - If the query is related to current events or popular topics, explore news sources and reputable websites.
       - Use direct Google searches to find additional relevant information and fill in any gaps.
@@ -29,9 +29,9 @@ class TaskPrompts:
       Query:
       ----------
       {query}
-    
+
     """), agent=agent,
-        expected_output=dedent(f"""
+                    expected_output=dedent(f"""
         The expected output should be a comprehensive and well-researched answer to the given query. The answer should:
 
         1. Address the query from multiple angles, considering different aspects and perspectives relevant to the topic.
@@ -45,6 +45,56 @@ class TaskPrompts:
         The length of the answer may vary depending on the complexity of the query and the amount of relevant information available. However, it should aim to be comprehensive enough to provide a satisfactory and informative response to the query.
 
         Overall, the expected output is a well-researched, detailed, and reliable answer that demonstrates a deep understanding of the topic and provides valuable insights and information to the reader.
+
+        Note: Image-based searches should only be used if the query explicitly requires visual information or real-world examples. For queries that do not specifically demand visual content, focus on other search methods such as scholarly articles, news sources, and direct Google searches to gather relevant information.
+        """))
+
+    def do_research_w_feedback(self, query, role, feedback, agent):
+        return Task(description=dedent(f"""
+      Conduct further research on the given query based on the provided feedback to improve the search results.
+      Utilize your specialty background and {role} perspective to gather additional relevant information.
+
+      Feedback:
+      ----------
+      {feedback}
+
+      Analyze the feedback to identify areas that need improvement or additional exploration. Consider the following:
+      - If the feedback indicates a lack of relevance, refine your search keywords and focus on more specific aspects of the query.
+      - If the feedback suggests insufficient comprehensiveness, broaden your search to cover more aspects and perspectives related to the query.
+      - If the feedback points out a lack of depth, dive deeper into the most relevant subtopics and gather more detailed information.
+      - If the feedback questions the reliability of sources, prioritize reputable and authoritative sources such as scholarly articles and expert opinions.
+
+      Your additional research should be guided by the following goal:
+      Address the weaknesses identified in the feedback and enhance the search results to provide a more comprehensive, in-depth, and reliable answer to the query.
+
+      Aim to collect the following types of information based on the feedback:
+      - Relevant data, examples, or case studies that strengthen the answer's relevance and concreteness.
+      - Expert insights, analysis, or practical applications that deepen the understanding of the topic.
+      - Scientific evidence, theories, or arguments that reinforce the credibility and reliability of the answer.
+      - Illustrative analogies, anecdotes, or real-world examples that clarify complex concepts and make the answer more relatable.
+
+      {self.__tip_section()}
+      Remember, the ultimate goal is to incorporate the feedback and improve the search results to deliver a high-quality, informative answer that effectively addresses the query.
+
+      Query:
+      ----------
+      {query}
+
+    """), agent=agent,
+                    expected_output=dedent(f"""
+        The expected output should be an improved and refined answer to the given query based on the provided feedback. The answer should:
+
+        1. Address the specific areas of improvement identified in the feedback, such as relevance, comprehensiveness, depth, or reliability.
+        2. Incorporate additional relevant data, examples, or case studies that strengthen the answer's relevance and concreteness.
+        3. Include expert insights, analysis, or practical applications that deepen the understanding of the topic and address any gaps in the previous answer.
+        4. Present scientific evidence, theories, or arguments that reinforce the credibility and reliability of the answer, especially if the feedback questioned the sources.
+        5. Offer illustrative analogies, anecdotes, or real-world examples that clarify complex concepts and make the answer more relatable and accessible.
+
+        The refined answer should be structured in a logical and coherent manner, with clear connections between the additional information and the original query. It should be written in a clear, concise, and professional tone, addressing the feedback effectively.
+
+        The length of the refined answer may vary depending on the extent of the feedback and the amount of additional relevant information available. However, it should aim to provide a more comprehensive, in-depth, and reliable response to the query compared to the previous answer.
+
+        Overall, the expected output is an improved and refined answer that incorporates the feedback, addresses the identified weaknesses, and provides a higher-quality, informative response to the query.
         """))
 
     def pick_agent(self, query, agents, agent):
@@ -96,7 +146,7 @@ class TaskPrompts:
     The expected output should be a concise evaluation of the search results based on the given criteria. There are two possible outcomes:
 
     1. If the search results are satisfactory:
-       - The output should consist of a single word: "satisfactory".
+       - The output should consist of a single word: "satisfactory"
        - This indicates that the search results adequately answer the query and meet the criteria of relevance, comprehensiveness, depth, and reliability.
        - No further explanation or feedback is required.
 
