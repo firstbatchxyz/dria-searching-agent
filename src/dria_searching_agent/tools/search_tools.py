@@ -114,7 +114,7 @@ class NewsResult:
 class SerperSearchTools:
 
     @tool("Arxiv search")
-    def search_arxiv(inp):
+    def search_arxiv(query):
         """
         This is a tool to search the arxiv web about a given question and return relevant sources written on the topic.
         It will return a list of results where each result have an arxiv paper url
@@ -126,16 +126,15 @@ class SerperSearchTools:
 
         Returns:
         Response based on the input """
-        inp = json.loads(inp)
-        query = "arxiv " + inp["query"]
+        query = "arxiv " + query
         stype = "search"
-        lang = Locale.ENGLISH
+        lang = Locale.ENGLISH.value
         n_results = 25
 
         return SerperSearchTools.search(query, stype, lang, n_results)
 
     @tool("Search internet")
-    def search_internet(inp):
+    def search_internet(query, lang, n_results):
         """
         This is a tool to search the internet about a given question and return relevant results.
 
@@ -148,16 +147,12 @@ class SerperSearchTools:
 
         Returns:
         Response based on the input """
-        inp = json.loads(inp)
-        query = inp["query"]
         stype = "search"
-        lang = inp["lang"]
-        n_results = inp["n_results"]
 
         return SerperSearchTools.search(query, stype, lang, n_results)
 
     @tool("Search scholarly articles")
-    def search_articles(inp):
+    def search_articles(query, lang, n_results):
         """
         This is a tool to search the scholar web about a given question and return relevant sources written on the topic.
 
@@ -170,16 +165,12 @@ class SerperSearchTools:
 
         Returns:
         Response based on the input """
-        inp = json.loads(inp)
-        query = inp["query"]
         stype = "scholar"
-        lang = inp["lang"]
-        n_results = inp["n_results"]
 
         return SerperSearchTools.search(query, stype, lang, n_results)
 
     @tool("Search news")
-    def search_news(inp):
+    def search_news(query, lang, n_results):
         """
         This is a tool to search the news web about a given question and return relevant news articles.
 
@@ -192,16 +183,12 @@ class SerperSearchTools:
 
         Returns:
         Response based on the input """
-        inp = json.loads(inp)
-        query = inp["query"]
         stype = "news"
-        lang = inp["lang"]
-        n_results = inp["n_results"]
 
         return SerperSearchTools.search(query, stype, lang, n_results)
 
     @tool("Search images")
-    def search_images(inp):
+    def search_images(query, lang, n_results):
         """
         This is a tool to search the web for images based on a given query.
 
@@ -214,22 +201,18 @@ class SerperSearchTools:
 
         Returns:
         Response based on the input """
-        inp = json.loads(inp)
-        query = inp["query"]
-        lang = inp["lang"]
-        n_results = inp["n_results"]
 
         return SerperSearchTools.image_search(query, lang, n_results)
 
-    def search(query, stype="search", lang=Locale.ENGLISH, n_results=5):
+    def search(query, stype="search", lang=Locale.ENGLISH.value, n_results=5):
 
         assert stype in ["search", "scholar", "news"], "Invalid search type"
         url = "https://google.serper.dev/" + stype
-        gl = lang.value if lang.value != "en" else "us"
+        gl = lang if lang != "en" else "us"
         payload = {
             "q": query,
             "gl": gl,
-            "hl": lang.value,
+            "hl": lang,
             "page": 1,
             "num": min(n_results, 50)
         }
@@ -265,13 +248,13 @@ class SerperSearchTools:
         content = '\n'.join(formatted_results)
         return f"\nSearch result: {content}\n"
 
-    def image_search(query, lang=Locale.ENGLISH, n_results=5):
+    def image_search(query, lang=Locale.ENGLISH.value, n_results=5):
         url = "https://google.serper.dev/" + "image"
-        gl = lang.value if lang.value != "en" else "us"
+        gl = lang if lang != "en" else "us"
         payload = json.dumps({
             "q": query,
             "gl": gl,
-            "hl": lang.value,
+            "hl": lang,
             "num": min(n_results, 15)
         })
         headers = {
@@ -293,13 +276,13 @@ class SerperSearchTools:
         content = '\n'.join(formatted_results)
         return f"\nSearch result: {content}\n"
 
-    def arxiv_search(query, lang=Locale.ENGLISH, n_results=5):
+    def arxiv_search(query, lang=Locale.ENGLISH.value, n_results=5):
         url = "https://google.serper.dev/" + "search"
-        gl = lang.value if lang.value != "en" else "us"
+        gl = lang if lang != "en" else "us"
         payload = json.dumps({
             "q": query,
             "gl": gl,
-            "hl": lang.value,
+            "hl": lang,
             "num": min(n_results, 15)
         })
         headers = {

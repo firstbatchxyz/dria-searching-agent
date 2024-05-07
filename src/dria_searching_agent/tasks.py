@@ -68,7 +68,7 @@ class TaskPrompts:
     For example:
     Ethan Nakamura
     
-    The output should only include the name of the agent and nothing else. This allows for a clear and concise response that directly answers the question of which agent is most suitable for the given query.
+    The output should only include the name of the agent and nothing else, not even an extra comma. This allows for a clear and concise response that directly answers the question of which agent is most suitable for the given query.
     """))
 
     def evaluate_results(self, query, search_results, agent):
