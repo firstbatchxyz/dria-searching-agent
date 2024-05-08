@@ -26,7 +26,8 @@ openai = "^1.25.1"
 duckduckgo-search = "^5.3.0"
 
 [tool.poetry.scripts]
-app = "dria_searching_agent.main:main"
+search = "dria_searching_agent.main:main"
+search_v2 = "dria_searching_agent.main:main_w_manager"
 vectordb = "dria_searching_agent.db.storage:main"
 scrape = "dria_searching_agent.tools.browser_tools:main"
 fin = "dria_searching_agent.tools.fin_tools:main"

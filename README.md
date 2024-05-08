@@ -53,8 +53,13 @@ docker-compose up -d
 ## Running the Application
 Run the application using Poetry:
 ```bash
-poetry run app
+poetry run search
 ```
+or 
+```bash
+poetry run search_v2
+```
+Which compiles two different versions of the program.
 
 This command sets up a virtual environment specific to the project and executes the `app` script or module specified in the `pyproject.toml` under `[tool.poetry.scripts]`.
 

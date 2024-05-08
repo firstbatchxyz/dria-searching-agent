@@ -38,9 +38,27 @@ class ResearchCrew:
             feedback = self.__evaluate(research)
         return research
 
+    def run_w_manager(self):
+        research = self.__do_research_w_manager()
+        return research
+
     def __do_research(self):
 
-        initial_search = TaskPrompts().do_research(query=self.query)
+        agent = self.__pick_agent()
+        initial_search = TaskPrompts().do_research(query=self.query, agent=agent, role=agent.role)
+        crew = Crew(
+            agents=list(self.agents.values()),
+            tasks=[initial_search],
+            verbose=True,
+            memory=True,
+            llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
+        )
+        research = crew.kickoff()
+        return research
+
+    def __do_research_w_manager(self):
+
+        initial_search = TaskPrompts().do_research_w_manager(query=self.query)
         crew = Crew(
             agents=list(self.agents.values()),
             tasks=[initial_search],
@@ -66,6 +84,22 @@ class ResearchCrew:
             research = crew.kickoff()
             return research
 
+    def __pick_agent(self):
+
+        task = TaskPrompts().pick_agent(
+            query=self.query,
+            agents="\n".join([agent + "\n" + self.agents[agent].backstory for agent in self.agents.keys()]),
+            agent=self.picker)
+
+        crew = Crew(
+            agents=[self.picker],
+            tasks=[task],
+            verbose=True
+        )
+        agent = crew.kickoff()
+        agent = self.agents[agent.lower().strip()]
+        return agent
+
     def __evaluate(self, research):
         evaluate_task = TaskPrompts().evaluate_results(
                 search_results=research,
@@ -85,6 +119,7 @@ class ResearchCrew:
             agent = Agent(
                 **v,
                 verbose=True,
+                llm = ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY']),
                 tools=[
                     SerperSearchTools.search_internet,
                     SerperSearchTools.search_images,
@@ -109,13 +144,33 @@ class ResearchCrew:
             **evaluator_config,
             verbose=True)
 
+        picker_config = {
+            "role": "Agent Selection Specialist",
+            "specialty": "Matching Queries with Agents",
+            "backstory": "Dr. Nadia Patel is a highly skilled information retrieval expert with a background in cognitive science and decision-making. She has developed advanced algorithms for matching user queries with the most suitable agents based on their expertise, background, and problem-solving approaches. Her keen understanding of agent capabilities and her ability to analyze complex queries make her an invaluable asset in optimizing the research process.",
+            "goal": "Utilize my expertise in information retrieval and cognitive science to select the most appropriate agent for a given query, considering factors such as the agent's specialty, role, background, and problem-solving style. By carefully analyzing the query and the available agents, I aim to optimize the research process and ensure that the most relevant and accurate information is obtained efficiently.",
+            "allow_delegation": False
+            }
+
+        self.picker = Agent(
+            **picker_config,
+            verbose=True
+        )
+
 def main():
-    #import pdb
-    #pdb.set_trace()
     load_dotenv()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
     crew = ResearchCrew(query)
     result = crew.run()
+    print(result)
+    print("==========================================")
+
+def main_w_manager():
+    load_dotenv()
+    print("Welcome to Researcher!")
+    query = input("# Write down a question:\n\n")
+    crew = ResearchCrew(query)
+    result = crew.run_w_manager()
     print(result)
     print("==========================================")

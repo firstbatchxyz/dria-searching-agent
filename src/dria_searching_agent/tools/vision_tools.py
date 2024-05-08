@@ -67,7 +67,7 @@ class VisionTools:
     - query: This is the query
     - url: This is the url of the image to be analyzed
 
-    {"prompt": prompt, "url": url}
+    {"query": query, "url": url}
 
     Returns:
     Response from the vision model based on the prompt and image provided

@@ -3,7 +3,54 @@ from crewai import Task
 
 
 class TaskPrompts:
-    def do_research(self, query):
+
+    def do_research(self, query, role, agent):
+        return Task(description=dedent(f"""
+      Conduct a comprehensive search on the given query using your unique expertise and available tools.
+      Utilize your specialty background and {role} perspective to gather relevant information.
+
+      Analyze the query to determine the most appropriate search methods. Consider the following:
+      - If the query explicitly requires visual information or real-world examples, prioritize image-based searches.
+      - If the query demands scientific or academic insights, focus on scholarly articles and research papers.
+      - If the query is related to current events or popular topics, explore news sources and reputable websites.
+      - Use direct Google searches to find additional relevant information and fill in any gaps.
+
+      Your search should be guided by the following goal:
+      Find a detailed answer that covers multiple aspects of the query and is based on real, reliable information. The answer should be comprehensive, well-rounded, and grounded in scientific evidence or expert knowledge.
+
+      Aim to collect the following types of information:
+      - Real-world data and examples that support the answer and make it more concrete.
+      - Expert opinions, insights, and know-how that provide deeper understanding and practical applications.
+      - Scientific arguments, theories, and evidence that lend credibility to the answer.
+      - Relevant case studies, anecdotes, or analogies that illustrate key points and make the answer more relatable.
+
+      {self.__tip_section()} 
+      Remember, the ultimate goal is to provide a detailed, informative answer that addresses the query from multiple angles and is supported by reliable, real-world information.
+
+      Query:
+      ----------
+      {query}
+
+    """), agent=agent,
+                    expected_output=dedent(f"""
+        The expected output should be a comprehensive and well-researched answer to the given query. The answer should:
+
+        1. Address the query from multiple angles, considering different aspects and perspectives relevant to the topic.
+        2. Provide real-world data, examples, and case studies that support the answer and make it more concrete and relatable.
+        3. Include expert opinions, insights, and practical know-how that deepen the understanding of the topic and its applications.
+        4. Present scientific arguments, theories, and evidence that lend credibility to the answer and demonstrate its grounding in reliable sources.
+        5. Offer relevant analogies, anecdotes, or illustrations that clarify key points and make the answer more engaging and accessible.
+
+        The answer should be structured in a logical and coherent manner, with clear transitions between different sections or ideas. It should be written in a clear, concise, and professional tone, avoiding unnecessary jargon or technical language.
+
+        The length of the answer may vary depending on the complexity of the query and the amount of relevant information available. However, it should aim to be comprehensive enough to provide a satisfactory and informative response to the query.
+
+        Overall, the expected output is a well-researched, detailed, and reliable answer that demonstrates a deep understanding of the topic and provides valuable insights and information to the reader.
+
+        Note: Image-based searches should only be used if the query explicitly requires visual information or real-world examples. For queries that do not specifically demand visual content, focus on other search methods such as scholarly articles, news sources, and direct Google searches to gather relevant information.
+        """))
+
+    def do_research_w_manager(self, query):
         return Task(description=dedent(f"""
       Conduct a comprehensive search on the given query using your unique expertise and available tools.
       Utilize your specialty background and perspective to gather relevant information.
