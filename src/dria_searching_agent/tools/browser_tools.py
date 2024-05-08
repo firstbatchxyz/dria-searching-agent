@@ -8,6 +8,7 @@ from unstructured.partition.html import partition_html
 import tiktoken
 from src.dria_searching_agent.db import Storage
 import os
+from textblob import TextBlob
 
 
 class BrowserTools:
@@ -24,14 +25,15 @@ class BrowserTools:
     headers = {'cache-control': 'no-cache', 'content-type': 'application/json'}
     response = requests.request("POST", url, headers=headers, data=payload)
     elements = partition_html(text=response.text)
-    content = "\n\n".join([str(el) for el in elements])
-    content = BrowserTools.clean_text(content)
-    content = [content[i:i + 8000] for i in range(0, len(content), 8000)]
-    chunks = [chunk for chunk in content]
-    # body = "\n\n".join(chunks)
+    elements = [el for el in elements if el.category in ["NarrativeText", "Title"]]
+    body = "\n\n".join([str(el) for el in elements])
+    body = BrowserTools.clean_text(body)
+    blob = TextBlob(body)
+    chunks = [sent.raw.replace("\n", " ") for sent in blob.sentences]
 
     storage = Storage()
     storage.add_text_chunks(chunks, website)
+    print("Collection size: ", storage.client.count(collection_name=storage.col_name))
     return "Website ready for querying!"
 
   def clean_text(text):

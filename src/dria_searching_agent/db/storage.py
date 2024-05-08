@@ -1,10 +1,13 @@
 from qdrant_client import QdrantClient
 import random
+
 class Storage:
-    def __init__(self):
+    def __init__(self, col_name="scrape"):
         self.client = QdrantClient(url="http://localhost:6333")
-        if self.client.get_collection("pdf") is None:
-            self.client.recreate_collection("pdf", vectors_config=self.client.get_fastembed_vector_params())
+        self.col_name = col_name
+
+    def delete_collection(self):
+        self.client.delete_collection(self.col_name)
 
     def add(self, collection_name, documents, metadata, ids):
         self.client.add(
@@ -14,18 +17,18 @@ class Storage:
             ids=ids
         )
 
-    def add_chunks(self, chunks, collection_name="pdf"):
+    def add_chunks(self, chunks):
 
         docs = []
         metadata = []
         ids = []
         for chunk in chunks:
             docs.append(chunk["text"])
-            metadata.append({"source": "pdf"})
+            metadata.append({"source": "scrape"})
             ids.append(chunk["id"])
-        self.add(collection_name, docs, metadata, ids)
+        self.add(self.col_name, docs, metadata, ids)
 
-    def add_text_chunks(self, chunks, url, collection_name="pdf"):
+    def add_text_chunks(self, chunks, url):
 
         docs = []
         metadata = []
@@ -34,19 +37,24 @@ class Storage:
             docs.append(chunk)
             metadata.append({"source": url})
             ids.append(random.randint(0, 100000))
-        self.add(collection_name, docs, metadata, ids)
+        self.add(self.col_name, docs, metadata, ids)
 
-    def query(self, query_text, collection_name="pdf"):
+    def query(self, query_text):
         results = self.client.query(
-            collection_name=collection_name,
+            collection_name=self.col_name,
             query_text=query_text,
-            limit=10
+            limit=20
        )
-        return "\n".join([result.document for result in results])
+
+        for res in results:
+            print(res)
+            print("\n")
+        return "\n".join([result.document for result in results if result.score > 0.79])
 
 
 def main():
     storage = Storage()
+    #storage.delete_collection()
     chunks = [
         {
             "id": 1,
@@ -61,8 +69,9 @@ def main():
             "text": "Quantum computing is the study of quantum-mechanical phenomena to perform computation such as superposition and entanglement."
         }
     ]
-    storage.add_chunks(chunks)
+    #storage.add_chunks(chunks)
 
-    storage2 = Storage()
-    print(storage2.query("quantum computing"))
+    #storage2 = Storage()
+    d = storage.query("Apple Inc. risk factors")
+    #print(d)
 
