@@ -38,3 +38,23 @@ class FinancialData:
             stock_description[item_description] = item_value
 
         return stock_description
+
+
+def main():
+    BASE_URL = "https://www.google.com/finance"
+    INDEX = "NASDAQ"
+    SYMBOL = "AAPL"
+    LANGUAGE = "en"
+    TARGET_URL = f"{BASE_URL}/quote/{SYMBOL}:{INDEX}?hl={LANGUAGE}"
+
+    page = requests.get(TARGET_URL)
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    items = soup.find_all("div", {"class": "gyFHrc"})
+
+    stock_description = {}
+    for item in items:
+        item_description = item.find("div", {"class": "mfs7Fc"}).text
+        item_value = item.find("div", {"class": "P6K39c"}).text
+        stock_description[item_description] = item_value
+    print(stock_description)

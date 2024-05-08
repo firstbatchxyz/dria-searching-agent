@@ -1,4 +1,27 @@
-# DRIA Searching Agent
+<p align="center">
+  <img src="https://raw.githubusercontent.com/firstbatchxyz/dria-js-client/master/logo.svg" alt="logo" width="142">
+</p>
+
+<p align="center">
+  <h1 align="center">
+    Dria Search Agent
+  </h1>
+  <p align="center">
+    <i>Dria Search Agent replies queries with scientifically grounded answers with a multi-agent system.</i>
+  </p>
+</p>
+
+<p align="center">
+    <a href="https://opensource.org/license/apache-2-0" target="_blank">
+        <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache%202.0-7CB9E8.svg">
+    </a>
+    <a href="https://discord.gg/2wuU9ym6fq" target="_blank">
+        <img alt="Discord" src="https://static-00.iconduck.com/assets.00/discord-icon-1024x1024-nogerd99.png" width="22">
+    </a>
+</p>
+
+
+# DRIA Search Agent
 
 DRIA Searching Agent is an AI-powered tool that answers your questions by selecting the most relevant agent from a pool of agents with different backstories. The selected agent searches the internet, reads articles and websites, and provides a detailed response to your query.
 
