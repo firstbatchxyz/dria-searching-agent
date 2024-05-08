@@ -223,10 +223,10 @@ class SerperSearchTools:
 
         return SerperSearchTools.image_search(query, lang, n_results)
 
-    @tool("Ask storage for scraped website content")
+    @tool("Ask storage for pdf content")
     def get_context(query):
         """
-        This is a tool to get revelant context from scraped websites in the storage
+        This is a tool to get revelant context from downloaded PDFs in the storage
 
         Parameters:
         - query: the query to search for
@@ -284,7 +284,7 @@ class SerperSearchTools:
         return f"\nSearch result: {content}\n"
 
     def image_search(query, lang=Locale.ENGLISH.value, n_results=5):
-        url = "https://google.serper.dev/" + "image"
+        url = "https://google.serper.dev/" + "images"
         gl = lang if lang != "en" else "us"
         payload = json.dumps({
             "q": query,

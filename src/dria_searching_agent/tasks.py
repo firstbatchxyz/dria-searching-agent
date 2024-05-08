@@ -3,10 +3,10 @@ from crewai import Task
 
 
 class TaskPrompts:
-    def do_research(self, query, role, agent):
+    def do_research(self, query):
         return Task(description=dedent(f"""
       Conduct a comprehensive search on the given query using your unique expertise and available tools.
-      Utilize your specialty background and {role} perspective to gather relevant information.
+      Utilize your specialty background and perspective to gather relevant information.
 
       Analyze the query to determine the most appropriate search methods. Consider the following:
       - If the query explicitly requires visual information or real-world examples, prioritize image-based searches.
@@ -30,8 +30,8 @@ class TaskPrompts:
       ----------
       {query}
 
-    """), agent=agent,
-                    expected_output=dedent(f"""
+    """),
+        expected_output=dedent(f"""
         The expected output should be a comprehensive and well-researched answer to the given query. The answer should:
 
         1. Address the query from multiple angles, considering different aspects and perspectives relevant to the topic.
@@ -49,10 +49,10 @@ class TaskPrompts:
         Note: Image-based searches should only be used if the query explicitly requires visual information or real-world examples. For queries that do not specifically demand visual content, focus on other search methods such as scholarly articles, news sources, and direct Google searches to gather relevant information.
         """))
 
-    def do_research_w_feedback(self, query, role, feedback, agent):
+    def do_research_w_feedback(self, query, feedback):
         return Task(description=dedent(f"""
       Conduct further research on the given query based on the provided feedback to improve the search results.
-      Utilize your specialty background and {role} perspective to gather additional relevant information.
+      Utilize your specialty background and perspective to gather additional relevant information.
 
       Feedback:
       ----------
@@ -80,8 +80,8 @@ class TaskPrompts:
       ----------
       {query}
 
-    """), agent=agent,
-                    expected_output=dedent(f"""
+    """),
+        expected_output=dedent(f"""
         The expected output should be an improved and refined answer to the given query based on the provided feedback. The answer should:
 
         1. Address the specific areas of improvement identified in the feedback, such as relevance, comprehensiveness, depth, or reliability.

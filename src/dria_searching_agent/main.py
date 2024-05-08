@@ -4,6 +4,9 @@ import shutil
 from textwrap import dedent
 
 from crewai import Agent, Crew, Task
+from crewai.process import Process
+from langchain_anthropic import ChatAnthropic
+
 from src.dria_searching_agent.tasks import TaskPrompts
 
 from src.dria_searching_agent.tools.fin_tools import FinancialData
@@ -20,56 +23,45 @@ class ResearchCrew:
         self.picker = None
         self.evaluator = None
         self.query = query
+        self.scraped_links = []
         self.__create_agents()
 
     def run(self):
-        agent = self.__pick_agent()
-        research = self.__do_research(agent)
+        research = self.__do_research()
         feedback = self.__evaluate(research)
         i = 0
         if feedback[-1] == ".":
             feedback = feedback[:-1]
 
         while i < 1 and feedback.lower().strip() != "satisfactory":
-            research = self.__do_research_w_feedback(agent, feedback)
+            research = self.__do_research_w_feedback(feedback)
             feedback = self.__evaluate(research)
         return research
 
-    def __pick_agent(self):
+    def __do_research(self):
 
-        task = TaskPrompts().pick_agent(
-            query=self.query,
-            agents="\n".join([agent + "\n" + self.agents[agent].backstory for agent in self.agents.keys()]),
-            agent=self.picker)
-
+        initial_search = TaskPrompts().do_research(query=self.query)
         crew = Crew(
-            agents=[self.picker],
-            tasks=[task],
-            verbose=True
-        )
-        agent = crew.kickoff()
-        agent = self.agents[agent.lower().strip()]
-        return agent
-
-    def __do_research(self, agent):
-
-        initial_search = TaskPrompts().do_research(query=self.query, role=agent.role, agent=agent)
-        crew = Crew(
-            agents=[agent],
+            agents=list(self.agents.values()),
             tasks=[initial_search],
-            verbose=True
+            verbose=True,
+            memory=True,
+            process=Process.hierarchical,
+            manager_llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
         )
         research = crew.kickoff()
         return research
 
-    def __do_research_w_feedback(self, agent, feedback):
+    def __do_research_w_feedback(self,feedback):
 
-            feedback_search = TaskPrompts().do_research_w_feedback(query=self.query, role=agent.role,
-                                                                  feedback=feedback ,agent=agent)
+            feedback_search = TaskPrompts().do_research_w_feedback(query=self.query, feedback=feedback)
             crew = Crew(
-                agents=[agent],
+                agents=list(self.agents.values()),
                 tasks=[feedback_search],
-                verbose=True
+                verbose=True,
+                memory=True,
+                process=Process.hierarchical,
+                manager_llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
             )
             research = crew.kickoff()
             return research
@@ -99,23 +91,11 @@ class ResearchCrew:
                     BrowserTools.scrape_website,
                     SerperSearchTools.get_context,
                     FinancialData.scrape,
-                    VisionTools.vision
+                    VisionTools.vision,
+                    VisionTools.read_pdf
                 ]
             )
             self.agents[k.lower().strip()] = agent
-
-        picker_config = {
-            "role": "Agent Selection Specialist",
-            "specialty": "Matching Queries with Agents",
-            "backstory": "Dr. Nadia Patel is a highly skilled information retrieval expert with a background in cognitive science and decision-making. She has developed advanced algorithms for matching user queries with the most suitable agents based on their expertise, background, and problem-solving approaches. Her keen understanding of agent capabilities and her ability to analyze complex queries make her an invaluable asset in optimizing the research process.",
-            "goal": "Utilize my expertise in information retrieval and cognitive science to select the most appropriate agent for a given query, considering factors such as the agent's specialty, role, background, and problem-solving style. By carefully analyzing the query and the available agents, I aim to optimize the research process and ensure that the most relevant and accurate information is obtained efficiently.",
-            "allow_delegation": False
-            }
-
-        self.picker = Agent(
-            **picker_config,
-            verbose=True
-        )
 
         evaluator_config = {
             "role": "Answer Evaluation Specialist",
@@ -127,8 +107,7 @@ class ResearchCrew:
 
         self.evaluator = Agent(
             **evaluator_config,
-            verbose=True
-        )
+            verbose=True)
 
 def main():
     #import pdb

@@ -31,10 +31,10 @@ class BrowserTools:
     blob = TextBlob(body)
     chunks = [sent.raw.replace("\n", " ") for sent in blob.sentences]
 
-    storage = Storage()
-    storage.add_text_chunks(chunks, website)
-    print("Collection size: ", storage.client.count(collection_name=storage.col_name))
-    return "Website ready for querying!"
+    #storage = Storage()
+    #storage.add_text_chunks(chunks, website)
+    #print("Collection size: ", storage.client.count(collection_name=storage.col_name))
+    return "\n".join(chunks)
 
   def clean_text(text):
     # Remove unwanted repeated lines and navigational text

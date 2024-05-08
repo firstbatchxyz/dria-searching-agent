@@ -104,7 +104,7 @@ class VisionTools:
         """
     This is a tool used to extract text from a PDF and store it in a storage
         Parameters:
-        - url: This is the url of the PDF to be analyzed
+        - url: This is the url of the PDF to be analyzed, url should end with .pdf
         :return:
     """
         # Download PDF from URL
