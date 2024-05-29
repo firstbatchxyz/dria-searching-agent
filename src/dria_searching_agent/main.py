@@ -6,6 +6,8 @@ from textwrap import dedent
 from crewai import Agent, Crew, Task
 from crewai.process import Process
 from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
+from langchain_community.llms import ollama
 
 from src.dria_searching_agent.tasks import TaskPrompts
 
@@ -17,77 +19,77 @@ from dotenv import load_dotenv
 
 
 class ResearchCrew:
-    def __init__(self, query):
+    def __init__(self):
         self.agents_config = json.loads(open("src/dria_searching_agent/config/agents.json", "r").read())
+        self.model_config = json.loads(open("src/dria_searching_agent/config/model.json", "r").read())["active_model"]
         self.agents = {}
         self.picker = None
         self.evaluator = None
-        self.query = query
         self.scraped_links = []
         self.__create_agents()
 
-    def run(self):
-        research = self.__do_research()
-        feedback = self.__evaluate(research)
+    def run(self, query):
+        research = self.__do_research(query)
+        feedback = self.__evaluate(query, research)
         i = 0
         if feedback[-1] == ".":
             feedback = feedback[:-1]
 
         while i < 1 and feedback.lower().strip() != "satisfactory":
-            research = self.__do_research_w_feedback(feedback)
-            feedback = self.__evaluate(research)
+            research = self.__do_research_w_feedback(query, feedback)
+            feedback = self.__evaluate(query, research)
         return research
 
-    def run_w_manager(self):
-        research = self.__do_research_w_manager()
+    def run_w_manager(self, query):
+        research = self.__do_research_w_manager(query)
         return research
 
-    def __do_research(self):
+    def __do_research(self, query):
 
-        agent = self.__pick_agent()
-        initial_search = TaskPrompts().do_research(query=self.query, agent=agent, role=agent.role)
+        agent = self.__pick_agent(query)
+        initial_search = TaskPrompts().do_research(query=query, agent=agent, role=agent.role)
         crew = Crew(
             agents=list(self.agents.values()),
             tasks=[initial_search],
             verbose=True,
             memory=True,
-            llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
+            llm=self.__get_model()
         )
         research = crew.kickoff()
         return research
 
-    def __do_research_w_manager(self):
+    def __do_research_w_manager(self, query):
 
-        initial_search = TaskPrompts().do_research_w_manager(query=self.query)
+        initial_search = TaskPrompts().do_research_w_manager(query=query)
         crew = Crew(
             agents=list(self.agents.values()),
             tasks=[initial_search],
             verbose=True,
             memory=True,
             process=Process.hierarchical,
-            manager_llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
+            manager_llm=self.__get_model()
         )
         research = crew.kickoff()
         return research
 
-    def __do_research_w_feedback(self,feedback):
+    def __do_research_w_feedback(self, query, feedback):
 
-            feedback_search = TaskPrompts().do_research_w_feedback(query=self.query, feedback=feedback)
+            feedback_search = TaskPrompts().do_research_w_feedback(query=query, feedback=feedback)
             crew = Crew(
                 agents=list(self.agents.values()),
                 tasks=[feedback_search],
                 verbose=True,
                 memory=True,
                 process=Process.hierarchical,
-                manager_llm=ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY'])
+                manager_llm=self.__get_model()
             )
             research = crew.kickoff()
             return research
 
-    def __pick_agent(self):
+    def __pick_agent(self, query):
 
         task = TaskPrompts().pick_agent(
-            query=self.query,
+            query=query,
             agents="\n".join([agent + "\n" + self.agents[agent].backstory for agent in self.agents.keys()]),
             agent=self.picker)
 
@@ -100,10 +102,10 @@ class ResearchCrew:
         agent = self.agents[agent.lower().strip()]
         return agent
 
-    def __evaluate(self, research):
+    def __evaluate(self, query, research):
         evaluate_task = TaskPrompts().evaluate_results(
                 search_results=research,
-                query=self.query,agent=self.evaluator)
+                query=query,agent=self.evaluator)
 
         crew = Crew(
             agents=[self.evaluator],
@@ -119,7 +121,7 @@ class ResearchCrew:
             agent = Agent(
                 **v,
                 verbose=True,
-                llm = ChatAnthropic(model=os.environ["CLAUDE_OPUS"], api_key=os.environ['ANTHROPIC_KEY']),
+                llm = self.__get_model(),
                 tools=[
                     SerperSearchTools.search_internet,
                     SerperSearchTools.search_images,
@@ -157,12 +159,27 @@ class ResearchCrew:
             verbose=True
         )
 
+    def __get_model(self):
+        if self.model_config["provider"] == "Anthropic":
+            return ChatAnthropic(model=self.model_config["name"], api_key=os.environ['ANTHROPIC_KEY'])
+        elif self.model_config["provider"] == "OpenAI":
+            return ChatOpenAI(api_key=self.model_config["name"], model=os.environ['OPENAI_MODEL_NAME'])
+        elif self.model_config["provider"] == "Ollama":
+            return ollama.Ollama(model=self.model_config["name"])
+
+_research_crew_instance = None
+def GetResearchCrew():
+    global _research_crew_instance
+    if _research_crew_instance is None:
+        _research_crew_instance = ResearchCrew()
+    return _research_crew_instance
+
 def main():
     load_dotenv()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
-    crew = ResearchCrew(query)
-    result = crew.run()
+    crew = GetResearchCrew()
+    result = crew.run(query)
     print(result)
     print("==========================================")
 
@@ -170,7 +187,7 @@ def main_w_manager():
     load_dotenv()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
-    crew = ResearchCrew(query)
-    result = crew.run_w_manager()
+    crew = GetResearchCrew()
+    result = crew.run_w_manager(query)
     print(result)
     print("==========================================")
