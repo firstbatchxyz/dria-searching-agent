@@ -165,7 +165,7 @@ class ResearchCrew:
         elif self.model_config["provider"] == "OpenAI":
             return ChatOpenAI(api_key=self.model_config["name"], model=os.environ['OPENAI_MODEL_NAME'])
         elif self.model_config["provider"] == "Ollama":
-            return ollama.Ollama(model="phi3:medium")
+            return ollama.Ollama(model=self.model_config["name"])
 
 _research_crew_instance = None
 def GetResearchCrew():
