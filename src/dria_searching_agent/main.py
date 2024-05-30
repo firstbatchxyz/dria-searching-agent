@@ -144,6 +144,7 @@ class ResearchCrew:
 
         self.evaluator = Agent(
             **evaluator_config,
+            llm = self.__get_model(),
             verbose=True)
 
         picker_config = {
@@ -156,6 +157,7 @@ class ResearchCrew:
 
         self.picker = Agent(
             **picker_config,
+            llm = self.__get_model(),
             verbose=True
         )
 
