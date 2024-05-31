@@ -7,10 +7,62 @@ services:
       - "6334:6334"
     volumes:
       - ./qdrant_storage:/qdrant/storage:z
+    networks:
+      - dria-searching-agent-network
 
   browserless:
     image: ghcr.io/browserless/chromium
     environment:
-      - TOKEN=6R0W53R135510
+      - TOKEN=${BROWSERLESS_TOKEN}
     ports:
-      - "3000:3000"
+      - "3030:3000"
+    networks:
+      - dria-searching-agent-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    volumes:
+      - ~/.ollama:/root/.ollama
+    networks:
+      dria-searching-agent-network:
+        ipv4_address: 172.30.0.15
+    profiles: [ollama-docker]
+
+  search-agent-server:
+    image: dria-searching-agent:server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    environment:
+      AGENT_MODEL_PROVIDER: Ollama
+      AGENT_MODEL: phi3:latest
+      
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SERPER_API_KEY: ${SERPER_API_KEY}
+      BROWSERLESS_TOKEN: ${BROWSERLESS_TOKEN}
+
+      OPENAI_MODEL_NAME: "gpt4"
+      VISION_TOOL_MODEL: "CLAUDE_SONNET"
+
+      OLLAMA_URL: http://host.docker.internal:11434
+      QDRANT_URL: http://qdrant:6333
+      BROWSERLESS_URL: http://browserless:3000
+    networks:
+      dria-searching-agent-network:
+        ipv4_address: 172.30.0.22
+    profiles: [server]
+
+networks:
+  dria-searching-agent-network:
+    name: dria-searching-agent-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1

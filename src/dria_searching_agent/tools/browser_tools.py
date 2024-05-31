@@ -7,6 +7,7 @@ from unstructured.partition.html import partition_html
 
 import tiktoken
 from src.dria_searching_agent.db import Storage
+from src.dria_searching_agent.config import config
 import os
 from textblob import TextBlob
 
@@ -20,7 +21,7 @@ class BrowserTools:
     Useful to scrape and analyze website content to extract information
 
     """
-    url = f"http://0.0.0.0:3000/content?token={os.getenv('BROWSERLESS_TOKEN')}"
+    url = f"{config.BROWSERLESS_URL()}/content?token={config.BROWSERLESS_TOKEN()}"
     payload = json.dumps({"url": website})
     headers = {'cache-control': 'no-cache', 'content-type': 'application/json'}
     response = requests.request("POST", url, headers=headers, data=payload)

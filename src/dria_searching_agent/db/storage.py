@@ -1,9 +1,10 @@
 from qdrant_client import QdrantClient
 import random
+from src.dria_searching_agent.config import config
 
 class Storage:
     def __init__(self, col_name="scrape"):
-        self.client = QdrantClient(url="http://localhost:6333")
+        self.client = QdrantClient(url=config.QDRANT_URL())
         self.col_name = col_name
 
     def delete_collection(self):

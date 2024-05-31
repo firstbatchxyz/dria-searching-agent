@@ -44,28 +44,44 @@ DRIA Searching Agent is an AI-powered tool that answers your questions by select
    ```bash
    poetry install
    ```
-## Docker Compose
-The project includes a `docker-compose.yml` file for running Qdrant and Browserless services. To start the services, run:
+## Running the Application with Poetry
+
+To run the app with poetry, first start the Qdrand and Browserless services using docker-compose
+
 ```bash
 docker-compose up -d
 ```
 
-## Running the Application
-Run the application using Poetry:
+Then run the application using Poetry in one of three modes:
 ```bash
 poetry run search
+poetry run search_v2 # with manager
+poetry run server # server mode
 ```
-or 
-```bash
-poetry run search_v2
-```
-Which compiles two different versions of the program.
+Which compiles three different versions of the program.
 
 This command sets up a virtual environment specific to the project and executes the `app` script or module specified in the `pyproject.toml` under `[tool.poetry.scripts]`.
 
+## Running the Application in server mode with Docker-compose
+
+Project can be run in a server mode with the following docker compose profile
+
+```bash
+docker-compose --profile server up
+```
+
+Which sets up Qdrant, Browserless and agent services
+
+After the services are ready, agent server will be listening on port 5000, example request body:
+
+```json
+{
+    "query":"How does Google Maps detects traffic?",
+    "with_manager": true
+}
+```
 
 
-This will start Qdrant and Browserless services in the background.
 
 ## How to Use
 1. Ask a question or provide a query.

@@ -15,13 +15,13 @@ from src.dria_searching_agent.tools.fin_tools import FinancialData
 from src.dria_searching_agent.tools.search_tools import SerperSearchTools
 from src.dria_searching_agent.tools.vision_tools import VisionTools
 from src.dria_searching_agent.tools.browser_tools import BrowserTools
-from dotenv import load_dotenv
+from src.dria_searching_agent.config import config
+from src.dria_searching_agent.db import Storage
 
 
 class ResearchCrew:
     def __init__(self):
         self.agents_config = json.loads(open("src/dria_searching_agent/config/agents.json", "r").read())
-        self.model_config = json.loads(open("src/dria_searching_agent/config/model.json", "r").read())["active_model"]
         self.agents = {}
         self.picker = None
         self.evaluator = None
@@ -144,6 +144,7 @@ class ResearchCrew:
 
         self.evaluator = Agent(
             **evaluator_config,
+            llm = self.__get_model(),
             verbose=True)
 
         picker_config = {
@@ -156,16 +157,17 @@ class ResearchCrew:
 
         self.picker = Agent(
             **picker_config,
+            llm = self.__get_model(),
             verbose=True
         )
 
     def __get_model(self):
-        if self.model_config["provider"] == "Anthropic":
-            return ChatAnthropic(model=self.model_config["name"], api_key=os.environ['ANTHROPIC_KEY'])
-        elif self.model_config["provider"] == "OpenAI":
-            return ChatOpenAI(api_key=self.model_config["name"], model=os.environ['OPENAI_MODEL_NAME'])
-        elif self.model_config["provider"] == "Ollama":
-            return ollama.Ollama(model=self.model_config["name"])
+        if config.AGENT_MODEL_PROVIDER() == "Anthropic":
+            return ChatAnthropic(model=config.AGENT_MODEL(), api_key=config.ANTHROPIC_KEY())
+        elif config.AGENT_MODEL_PROVIDER() == "OpenAI":
+            return ChatOpenAI(api_key=config.AGENT_MODEL(), model=config.OPENAI_MODEL_NAME())
+        elif config.AGENT_MODEL_PROVIDER() == "Ollama":
+            return ollama.Ollama(model=config.AGENT_MODEL(), base_url=config.OLLAMA_URL())
 
 _research_crew_instance = None
 def GetResearchCrew():
@@ -175,7 +177,7 @@ def GetResearchCrew():
     return _research_crew_instance
 
 def main():
-    load_dotenv()
+    config.load_config()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
     crew = GetResearchCrew()
@@ -184,7 +186,7 @@ def main():
     print("==========================================")
 
 def main_w_manager():
-    load_dotenv()
+    config.load_config()
     print("Welcome to Researcher!")
     query = input("# Write down a question:\n\n")
     crew = GetResearchCrew()

@@ -8,6 +8,7 @@ import base64
 from crewai import Agent, Task
 from src.dria_searching_agent.tools.vision_tools import VisionTools
 from src.dria_searching_agent.db import Storage
+from src.dria_searching_agent.config import config
 
 
 class Locale(Enum):
@@ -257,7 +258,7 @@ class SerperSearchTools:
 
         payload = json.dumps(payload)
         headers = {
-            'X-API-KEY': os.environ['SERPER_API_KEY'],
+            'X-API-KEY': config.SERPER_API_KEY(),
             'content-type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
@@ -293,7 +294,7 @@ class SerperSearchTools:
             "num": min(n_results, 15)
         })
         headers = {
-            'X-API-KEY': os.environ['SERPER_API_KEY'],
+            'X-API-KEY': config.SERPER_API_KEY(),
             'content-type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
@@ -321,7 +322,7 @@ class SerperSearchTools:
             "num": min(n_results, 15)
         })
         headers = {
-            'X-API-KEY': os.environ['SERPER_API_KEY'],
+            'X-API-KEY': config.SERPER_API_KEY(),
             'content-type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
