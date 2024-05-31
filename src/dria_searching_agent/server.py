@@ -4,6 +4,7 @@ from flask_limiter.util import get_remote_address
 from functools import wraps
 from dotenv import load_dotenv
 from src.dria_searching_agent.main import ResearchCrew, GetResearchCrew
+from src.dria_searching_agent.config import config
 
 app = Flask(__name__)
 
@@ -47,6 +48,6 @@ def server():
     app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
-    load_dotenv()
+    config.load_config()
     GetResearchCrew()
     server()

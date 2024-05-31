@@ -10,6 +10,7 @@ import httpx
 import base64
 from io import BytesIO
 from src.dria_searching_agent.db import Storage
+from src.dria_searching_agent.config import config
 
 
 def read_response_bytes(response):
@@ -73,7 +74,7 @@ class VisionTools:
     Response from the vision model based on the prompt and image provided
     """
 
-        chat = ChatAnthropic(model=os.environ["CLAUDE_SONNET"], api_key=os.environ['ANTHROPIC_KEY'])
+        chat = ChatAnthropic(model=config.VISION_TOOL_MODEL(), api_key=config.ANTHROPIC_KEY())
         #url = inp["url"]
         #query = inp["query"]
         # Check if url ends with jpg, jpeg or png, or other
