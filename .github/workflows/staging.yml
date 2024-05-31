@@ -56,4 +56,5 @@ jobs:
           IMAGE_NAME: ${{ steps.iname.outputs.iname }}
           IMAGE_TAG: ${{ steps.itag.outputs.itag }}
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 -t $IMAGE_NAME:$IMAGE_TAG --push .
+          docker buildx create --use --name ibuilder --driver docker-container
+          docker buildx build --platform linux/amd64,linux/arm64 --builder=ibuilder -t $IMAGE_NAME:$IMAGE_TAG --push .
