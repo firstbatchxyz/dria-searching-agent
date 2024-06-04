@@ -162,11 +162,11 @@ class ResearchCrew:
         )
 
     def __get_model(self):
-        if config.AGENT_MODEL_PROVIDER() == "Anthropic":
+        if config.AGENT_MODEL_PROVIDER().lower() == "anthropic":
             return ChatAnthropic(model=config.AGENT_MODEL(), api_key=config.ANTHROPIC_KEY())
-        elif config.AGENT_MODEL_PROVIDER() == "OpenAI":
+        elif config.AGENT_MODEL_PROVIDER().lower() == "openai":
             return ChatOpenAI(api_key=config.AGENT_MODEL(), model=config.OPENAI_MODEL_NAME())
-        elif config.AGENT_MODEL_PROVIDER() == "Ollama":
+        elif config.AGENT_MODEL_PROVIDER().lower() == "ollama":
             return ollama.Ollama(model=config.AGENT_MODEL(), base_url=config.OLLAMA_URL())
 
 _research_crew_instance = None
