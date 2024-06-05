@@ -12,20 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-          mask-aws-account-id: "false"
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          mask-password: "true"
-
       - name: Get Unix Time
         id: timestamp
         run: echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
@@ -34,17 +20,13 @@ jobs:
         id: sha
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Get Branch Name
-        id: branch
-        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-
       - name: Set Image Tag
         id: itag
-        run: echo "itag=${{ steps.branch.outputs.branch }}-${{ steps.sha.outputs.sha }}-${{ steps.timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
+        run: echo "itag=latest" >> $GITHUB_OUTPUT
 
       - name: Set Image Name
         id: iname
-        run: echo "iname=${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}" >> $GITHUB_OUTPUT
+        run: echo "iname=firstbatch/${{ github.event.repository.name }}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
