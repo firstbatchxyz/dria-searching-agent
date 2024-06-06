@@ -13,13 +13,11 @@ class Config:
         self.serper_api_key = os.getenv('SERPER_API_KEY')
         self.browserless_token = os.getenv('BROWSERLESS_TOKEN')
         
-        self.openai_model_name = os.getenv('OPENAI_MODEL_NAME', "gpt-4")
         self.vision_tool_model = os.getenv('VISION_TOOL_MODEL', "CLAUDE_SONNET")
 
         self.ollama_url = os.getenv('OLLAMA_URL')
         self.qdrant_url = os.getenv('QDRANT_URL')
         self.browserless_url = os.getenv('BROWSERLESS_URL')
-
 
 config = Config()
 def load_config():
@@ -38,9 +36,6 @@ def ANTHROPIC_KEY():
 def OPENAI_API_KEY():
     return config.openai_api_key
 
-def OPENAI_MODEL_NAME():
-    return config.openai_model_name
-
 def OLLAMA_URL():
     return config.ollama_url
 
@@ -58,5 +53,4 @@ def BROWSERLESS_URL():
 
 def VISION_TOOL_MODEL():
     return config.vision_tool_model
-
 

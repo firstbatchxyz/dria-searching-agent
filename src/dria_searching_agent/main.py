@@ -165,7 +165,7 @@ class ResearchCrew:
         if config.AGENT_MODEL_PROVIDER().lower() == "anthropic":
             return ChatAnthropic(model=config.AGENT_MODEL(), api_key=config.ANTHROPIC_KEY())
         elif config.AGENT_MODEL_PROVIDER().lower() == "openai":
-            return ChatOpenAI(api_key=config.AGENT_MODEL(), model=config.OPENAI_MODEL_NAME())
+            return ChatOpenAI(model=config.AGENT_MODEL(), api_key=config.OPENAI_API_KEY())
         elif config.AGENT_MODEL_PROVIDER().lower() == "ollama":
             return ollama.Ollama(model=config.AGENT_MODEL(), base_url=config.OLLAMA_URL())
 
