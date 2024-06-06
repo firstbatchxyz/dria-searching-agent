@@ -3,3 +3,5 @@
 /playground.py
 .DS_Store
 /dist
+/qdrant_storage
+*__pycache__*
