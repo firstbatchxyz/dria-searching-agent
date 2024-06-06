@@ -7,6 +7,7 @@ class Config:
         
         self.agent_model_provider = os.getenv('AGENT_MODEL_PROVIDER')
         self.agent_model = os.getenv('AGENT_MODEL')
+        self.agent_max_iter = os.getenv('AGENT_MAX_ITER', 10)
 
         self.anthropic_key = os.getenv('ANTHROPIC_KEY')
         self.openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -29,6 +30,9 @@ def AGENT_MODEL_PROVIDER():
 
 def AGENT_MODEL():
     return config.agent_model
+
+def AGENT_MAX_ITER():
+    return config.agent_max_iter
 
 def ANTHROPIC_KEY():
     return config.anthropic_key

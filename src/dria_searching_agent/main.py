@@ -120,6 +120,7 @@ class ResearchCrew:
         for k,v in self.agents_config.items():
             agent = Agent(
                 **v,
+                max_iter=config.AGENT_MAX_ITER(), # TODO: maybe we can get this from agents.json
                 verbose=True,
                 llm = self.__get_model(),
                 tools=[
