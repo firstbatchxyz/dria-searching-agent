@@ -50,9 +50,9 @@ jobs:
           IMAGE_TAG: ${{ steps.itag.outputs.itag }}
         run: |
           docker buildx create --use --name ibuilder --driver docker-container
-          docker buildx build --platform linux/arm64 --builder=ibuilder -t $IMAGE_NAME:$IMAGE_TAG-arm64 --load .
-          docker push $IMAGE_NAME:$IMAGE_TAG-arm64
-          docker rmi $IMAGE_NAME:$IMAGE_TAG-arm64
+          docker buildx build --platform linux/arm64 --builder=ibuilder -t $IMAGE_NAME:$IMAGE_TAG --load .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker rmi $IMAGE_NAME:$IMAGE_TAG
 
     outputs:
       itag: ${{ steps.itag.outputs.itag }}
