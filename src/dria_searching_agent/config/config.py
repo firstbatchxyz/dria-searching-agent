@@ -5,8 +5,8 @@ class Config:
     def __init__(self):
         load_dotenv()  # This loads environment variables from a .env file if it exists
         
-        self.agent_model_provider = os.getenv('AGENT_MODEL_PROVIDER')
-        self.agent_model = os.getenv('AGENT_MODEL')
+        self.agent_model_provider = os.getenv('AGENT_MODEL_PROVIDER', "ollama")
+        self.agent_model_name = os.getenv('AGENT_MODEL_NAME', "gpt-4o")
         self.agent_max_iter = os.getenv('AGENT_MAX_ITER', 10)
 
         self.anthropic_key = os.getenv('ANTHROPIC_KEY')
@@ -28,8 +28,8 @@ def load_config():
 def AGENT_MODEL_PROVIDER():
     return config.agent_model_provider
 
-def AGENT_MODEL():
-    return config.agent_model
+def AGENT_MODEL_NAME():
+    return config.agent_model_name
 
 def AGENT_MAX_ITER():
     return config.agent_max_iter
