@@ -120,6 +120,7 @@ class ResearchCrew:
         for k,v in self.agents_config.items():
             agent = Agent(
                 **v,
+                max_iter=config.AGENT_MAX_ITER(), # TODO: maybe we can get this from agents.json
                 verbose=True,
                 llm = self.__get_model(),
                 tools=[
@@ -163,11 +164,11 @@ class ResearchCrew:
 
     def __get_model(self):
         if config.AGENT_MODEL_PROVIDER().lower() == "anthropic":
-            return ChatAnthropic(model=config.AGENT_MODEL(), api_key=config.ANTHROPIC_KEY())
+            return ChatAnthropic(model=config.AGENT_MODEL_NAME(), api_key=config.ANTHROPIC_KEY())
         elif config.AGENT_MODEL_PROVIDER().lower() == "openai":
-            return ChatOpenAI(api_key=config.AGENT_MODEL(), model=config.OPENAI_MODEL_NAME())
+            return ChatOpenAI(model=config.AGENT_MODEL_NAME(), api_key=config.OPENAI_API_KEY())
         elif config.AGENT_MODEL_PROVIDER().lower() == "ollama":
-            return ollama.Ollama(model=config.AGENT_MODEL(), base_url=config.OLLAMA_URL())
+            return ollama.Ollama(model=config.AGENT_MODEL_NAME(), base_url=config.OLLAMA_URL())
 
 _research_crew_instance = None
 def GetResearchCrew():

@@ -31,15 +31,15 @@ services:
     profiles: [ollama-docker]
 
   search-agent-server:
-    image: dria-searching-agent:server
+    image: firstbatch/dria-searching-agent:latest
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 5000:5000
     environment:
-      AGENT_MODEL_PROVIDER: Ollama
-      AGENT_MODEL: phi3:latest
+      AGENT_MODEL_PROVIDER: ${AGENT_MODEL_PROVIDER}
+      AGENT_MODEL_NAME: ${AGENT_MODEL_NAME}
       
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
