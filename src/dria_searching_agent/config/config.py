@@ -32,7 +32,11 @@ def AGENT_MODEL_NAME():
     return config.agent_model_name
 
 def AGENT_MAX_ITER():
-    return config.agent_max_iter
+    try:
+        int_val = int(config.agent_max_iter)
+        return int_val
+    except ValueError:
+        return 10
 
 def ANTHROPIC_KEY():
     return config.anthropic_key
